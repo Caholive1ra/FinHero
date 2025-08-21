@@ -35,3 +35,44 @@ edufinai-api/
  ├── README.md         # Documentação principal
  └── ... 
 
+
+---
+
+## 🚀 Como Executar o Projeto
+
+### Pré-requisitos
+- Java 21 instalado  
+- Maven configurado (`mvn -v` para verificar)  
+- Oracle Database em execução  
+
+### Passos
+1. Clone este repositório:  
+   ```bash
+   git clone https://github.com/Edu-fin-Ai/EduFinAi.git
+   cd EduFinAi
+
+2. Compile o projeto com Maven:
+   mvn clean install
+
+3. Execute a aplicação Spring Boot:
+  mvn spring-boot:run
+
+4. Acesse no navegador:
+ http://localhost:8080
+
+## 👥 Equipe
+🙂 Amanda
+🙂 Alex Caje Felix
+🙂 Ana Cristina dos Santos
+🙂 Bruno Pires
+🙂 Carolina
+
+## 📌 Próximos Passos
+ Criar endpoints para cadastro de usuários
+ Conectar aplicação ao banco Oracle
+ Desenvolver interface web inicial
+ Implementar módulo de IA para recomendações financeiras
+
+## 📜 Licença
+Este projeto está sob a licença MIT. Consulte o arquivo LICENSE
+ para mais detalhes.
