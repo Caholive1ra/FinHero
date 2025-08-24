@@ -1,85 +1,80 @@
 # 💰 Projeto EduFinAI
 
-![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)
-![Java](https://img.shields.io/badge/java-21-blue)
-![SpringBoot](https://img.shields.io/badge/SpringBoot-3.3-green)
-![Maven](https://img.shields.io/badge/build-Maven-orange)
-![Banco](https://img.shields.io/badge/DB-Oracle-red)
-![Licença](https://img.shields.io/badge/licença-MIT-green)
+![status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)
+![java](https://img.shields.io/badge/java-21-blue)
+![springboot](https://img.shields.io/badge/SpringBoot-3.3-brightgreen)
+![build](https://img.shields.io/badge/build-Maven-blueviolet)
+![DB](https://img.shields.io/badge/DB-Oracle-red)
+![licença](https://img.shields.io/badge/licença-MIT-green)
 
 ---
 
 ## 📌 Sobre o Projeto
 
-O **EduFinAI** é um sistema web desenvolvido pelo grupo para apoio ao **controle financeiro pessoal** com auxílio de inteligência artificial.  
-O objetivo é integrar **Frontend + Backend + Banco de Dados** em uma aplicação que simula uma plataforma de gestão financeira, ajudando o usuário a organizar seus gastos, planejar orçamentos e melhorar sua educação financeira.
+O **EduFinAI** é um sistema web desenvolvido por um grupo de estudantes da FIAP (ADS EAD 2025.1) com o objetivo de apoiar o **controle financeiro pessoal** utilizando **inteligência artificial**.
+
+A proposta é integrar **Frontend**, **Backend** e **Banco de Dados** em uma plataforma de gestão que ajude o usuário a organizar seus gastos, planejar orçamentos e melhorar sua educação financeira com o auxílio de tecnologia.
 
 ---
 
 ## 🛠️ Tecnologias Utilizadas
 
-- **Frontend**: HTML, CSS, JavaScript (com framework adicional no futuro)  
-- **Backend**: Java 21 + Spring Boot 3.3  
-- **Banco de Dados**: Oracle  
-- **Build/Dependências**: Maven  
-- **IDE**: IntelliJ IDEA Community Edition  
+- **Frontend:** HTML, CSS, JavaScript *(framework a definir em fases futuras)*
+- **Backend:** Java 21 + Spring Boot 3.3
+- **Banco de Dados:** Oracle
+- **Build/Dependências:** Maven
+- **IDE Recomendada:** IntelliJ IDEA Community Edition
 
 ---
 
-## 📂 Estrutura do Repositório
+## 📁 Estrutura do Repositório
 
-```bash
 edufinai-api/
- ├── src/              # Código-fonte (controllers, services, repositories, models)
- ├── pom.xml           # Configuração Maven
- ├── README.md         # Documentação principal
- └── ... 
+├── src/ # Código-fonte (controllers, services, repositories, models)
+├── pom.xml # Configuração do Maven
+├── README.md # Documentação principal
+└── ...
 
 
 ---
 
 ## 🚀 Como Executar o Projeto
 
-### Pré-requisitos
-- Java 21 instalado  
-- Maven configurado (`mvn -v` para verificar)  
-- Oracle Database em execução  
+### 🔧 Pré-requisitos
 
-### Passos
-1. Clone este repositório:  
-   ```bash
-   git clone https://github.com/Edu-fin-Ai/EduFinAi.git
-   cd EduFinAi
+- Java 21+
+- Maven 3.8+
+- Oracle instalado ou conexão configurada
+- IntelliJ IDEA ou outra IDE compatível
 
-2. Compile o projeto com Maven:
-   mvn clean install
+### ▶️ Execução Local
 
-3. Execute a aplicação Spring Boot:
-  mvn spring-boot:run
+```bash
+# Clone este repositório
+git clone https://github.com/EduFinAI/EduFinAI.git
 
-4. Acesse no navegador:
- http://localhost:8080
+# Acesse o diretório do backend
+cd EduFinAI/edufinai-api
 
----
-
-## 👥 Equipe
-
-🙂 Amanda
-🙂 Alex Caje Felix
-🙂 Ana Cristina
-🙂 Bruno Pires
-🙂 Carolina
+# Compile e rode o projeto
+mvn spring-boot:run
 
 ---
 
-## 📌 Próximos Passos
- Criar endpoints para cadastro de usuários
- Conectar aplicação ao banco Oracle
- Desenvolver interface web inicial
- Implementar módulo de IA para recomendações financeiras
+## 🤖 Inteligência Artificial no Projeto
+
+O uso de IA no EduFinAI encntra-se em definição.
 
 ---
 
-## 📜 Licença
-Este projeto está sob a licença MIT. Consulte o arquivo LICENSE
- para mais detalhes.
+## 📌 Roadmap (Resumo)
+
+- [x] Criação do repositório e estruturação inicial
+- [x] Backend com Java + Spring Boot 3.3
+- [ ] Criação do frontend (HTML/CSS/JS)
+- [ ] Integração com banco Oracle
+- [ ] Primeiras funcionalidades de IA
+- [ ] Testes e refinamento do MVP
+- [ ] Deploy da aplicação em ambiente cloud
+
+
