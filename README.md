@@ -27,14 +27,14 @@ A proposta é integrar **Frontend**, **Backend** e **Banco de Dados** em uma pla
 
 ---
 
-## 📁 Estrutura do Repositório
+## 🗂️ Estrutura do Repositório
 
+```bash
 edufinai-api/
-├── src/ # Código-fonte (controllers, services, repositories, models)
-├── pom.xml # Configuração do Maven
-├── README.md # Documentação principal
-└── ...
-
+├── src/              # Código-fonte (controllers, services, repositories, models)
+├── pom.xml           # Configuração do Maven
+├── README.md         # Documentação principal
+└── ...               # Outros arquivos do projeto
 
 ---
 
