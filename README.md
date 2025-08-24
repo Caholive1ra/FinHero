@@ -36,6 +36,7 @@ edufinai-api/
 ├── README.md         # Documentação principal
 └── ...               # Outros arquivos do projeto
 
+
 ---
 
 ## 🚀 Como Executar o Projeto
@@ -77,4 +78,24 @@ O uso de IA no EduFinAI encntra-se em definição.
 - [ ] Testes e refinamento do MVP
 - [ ] Deploy da aplicação em ambiente cloud
 
+---
+
+## 👥 Contribuidores
+
+| Nome                   | Função                   |
+|------------------------|--------------------------|
+| Alex                   | Backend Developer        |
+| Amanda Mendes          | Frontend Developer       |
+| Ana Cristina           | Scrum Master             |
+| Bruno Freitas          | Backend Developer        |
+| Carolina               | IA/NLP Developer         |
+
+---
+
+## 📄 Licença
+
+Distribuído sob a licença MIT.  
+Consulte o arquivo [`LICENSE`](LICENSE) para mais detalhes.
+
+---
 
