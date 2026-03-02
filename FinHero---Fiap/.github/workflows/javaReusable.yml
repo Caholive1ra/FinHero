@@ -1,0 +1,199 @@
+name: Java Reusable Workflow
+
+on:
+  workflow_call:
+    inputs:
+      java-version:
+        description: "Java version to use"
+        type: string
+        required: false
+        default: "21"
+      maven-version:
+        description: "Maven version to use"
+        type: string
+        required: false
+        default: "3.9.5"
+      java-distribution:
+        description: "Java distribution to use"
+        type: string
+        required: false
+        default: "temurin"
+      runs-on:
+        description: "Runner to use"
+        type: string
+        required: false
+        default: "ubuntu-latest"
+    secrets:
+      secret-key:
+        description: "Optional secret key"
+        required: false
+        
+jobs:
+  build:
+    runs-on: ${{ inputs.runs-on }}
+    permissions:
+      contents: write
+      pull-requests: write
+      security-events: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Read settings.yml and set config
+        id: config
+        run: |
+          # Use defaults if settings.yml not found or values not set
+          JAVA_VERSION="${{ inputs.java-version }}"
+          MAVEN_VERSION="${{ inputs.maven-version }}"
+          JAVA_DIST="${{ inputs.java-distribution }}"
+          JACOCO_ENABLED="true"
+          JACOCO_REPORT="target/site/jacoco/jacoco.xml"
+          MIN_COVERAGE="0"
+          
+          echo "java_version=${JAVA_VERSION}" >> $GITHUB_OUTPUT
+          echo "java_distribution=${JAVA_DIST}" >> $GITHUB_OUTPUT
+          echo "maven_version=${MAVEN_VERSION}" >> $GITHUB_OUTPUT
+          echo "jacoco_enabled=${JACOCO_ENABLED}" >> $GITHUB_OUTPUT
+          echo "jacoco_report=${JACOCO_REPORT}" >> $GITHUB_OUTPUT
+          echo "min_coverage=${MIN_COVERAGE}" >> $GITHUB_OUTPUT
+      
+      - name: Set up JDK ${{ steps.config.outputs.java_version }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ steps.config.outputs.java_version }}
+          distribution: ${{ steps.config.outputs.java_distribution }}
+      
+      - name: Set up Maven ${{ steps.config.outputs.maven_version }}
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: ${{ steps.config.outputs.maven_version }}
+      
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      
+      - name: Build with Maven
+        working-directory: finhero
+        run: mvn clean install 
+        
+      - name: Run tests with JaCoCo
+        if: steps.config.outputs.jacoco_enabled == 'true'
+        working-directory: finhero
+        run: mvn jacoco:prepare-agent test jacoco:report
+        
+      - name: Run tests without JaCoCo
+        if: steps.config.outputs.jacoco_enabled != 'true'
+        working-directory: finhero
+        run: mvn test
+      
+      - name: Generate JaCoCo Report
+        if: steps.config.outputs.jacoco_enabled == 'true'
+        working-directory: finhero
+        run: mvn jacoco:report
+        continue-on-error: true
+      
+      - name: Check coverage threshold
+        if: steps.config.outputs.jacoco_enabled == 'true'
+        id: coverage_check
+        working-directory: finhero
+        run: |
+          if [ -f target/site/jacoco/jacoco.xml ]; then
+            COVERAGE=$(grep -oP 'type="INSTRUCTION" covered=\K[0-9]+' target/site/jacoco/jacoco.xml | head -1 || echo "0")
+            echo "Current coverage: $COVERAGE%"
+            echo "Minimum required: ${{ steps.config.outputs.min_coverage }}%"
+            
+            if [ "$COVERAGE" -lt "${{ steps.config.outputs.min_coverage }}" ]; then
+              echo "Coverage is below minimum threshold!" 
+              exit 1
+            fi
+          fi
+      
+      - name: Generate test summary
+        if: always()
+        id: test_summary
+        working-directory: finhero
+        run: |
+          SUMMARY=""
+          
+          # Extract test results from surefire reports
+          if [ -d target/surefire-reports ]; then
+            TOTAL_TESTS=$(find target/surefire-reports -name "*.txt" -exec grep -h "Tests run:" {} \; | awk '{sum+=$3} END {print sum}' || echo "0")
+            TESTS_FAILED=$(find target/surefire-reports -name "*.txt" -exec grep -h "Tests run:" {} \; | awk '{sum+=$6} END {print sum}' || echo "0")
+            TESTS_ERRORS=$(find target/surefire-reports -name "*.txt" -exec grep -h "Tests run:" {} \; | awk '{sum+=$9} END {print sum}' || echo "0")
+            TESTS_SKIPPED=$(find target/surefire-reports -name "*.txt" -exec grep -h "Tests run:" {} \; | awk '{sum+=$12} END {print sum}' || echo "0")
+            TESTS_SUCCESS=$((TOTAL_TESTS - TESTS_FAILED - TESTS_ERRORS - TESTS_SKIPPED))
+            
+            echo "total=$TOTAL_TESTS" >> $GITHUB_OUTPUT
+            echo "failed=$TESTS_FAILED" >> $GITHUB_OUTPUT
+            echo "errors=$TESTS_ERRORS" >> $GITHUB_OUTPUT
+            echo "skipped=$TESTS_SKIPPED" >> $GITHUB_OUTPUT
+            echo "success=$TESTS_SUCCESS" >> $GITHUB_OUTPUT
+          fi
+          
+          # Extract coverage information
+          if [ "${{ steps.config.outputs.jacoco_enabled }}" == "true" ] && [ -f target/site/jacoco/jacoco.xml ]; then
+            COVERAGE=$(grep -oP 'type="INSTRUCTION" covered=\K[0-9]+' target/site/jacoco/jacoco.xml | head -1 || echo "0")
+            COVERAGE_TOTAL=$(grep -oP 'type="INSTRUCTION" missed=\K[0-9]+' target/site/jacoco/jacoco.xml | head -1 || echo "0")
+            TOTAL_INSTR=$((COVERAGE + COVERAGE_TOTAL))
+            COVERAGE_PERCENT=$(awk "BEGIN {printf \"%.2f\", ($COVERAGE/$TOTAL_INSTR)*100}" 2>/dev/null || echo "0")
+            
+            echo "coverage=$COVERAGE_PERCENT" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Display test results
+        if: always()
+        run: |
+          echo "## 📊 Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### 🔧 Build Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "| Setting | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Java Version | \`${{ steps.config.outputs.java_version }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Java Distribution | \`${{ steps.config.outputs.java_distribution }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Maven Version | \`${{ steps.config.outputs.maven_version }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| JaCoCo Enabled | \`${{ steps.config.outputs.jacoco_enabled }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -d finhero/target/surefire-reports ]; then
+            echo "### ✅ Test Results" >> $GITHUB_STEP_SUMMARY
+            echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Total Tests | **${{ steps.test_summary.outputs.total }}** |" >> $GITHUB_STEP_SUMMARY
+            echo "| ✅ Passed | **${{ steps.test_summary.outputs.success }}** |" >> $GITHUB_STEP_SUMMARY
+            echo "| ❌ Failed | **${{ steps.test_summary.outputs.failed }}** |" >> $GITHUB_STEP_SUMMARY
+            echo "| ⚠️ Errors | **${{ steps.test_summary.outputs.errors }}** |" >> $GITHUB_STEP_SUMMARY
+            echo "| ⏭️ Skipped | **${{ steps.test_summary.outputs.skipped }}** |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ "${{ steps.config.outputs.jacoco_enabled }}" == "true" ] && [ -f finhero/target/site/jacoco/jacoco.xml ]; then
+            echo "### 📈 Code Coverage" >> $GITHUB_STEP_SUMMARY
+            echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Coverage | **${{ steps.test_summary.outputs.coverage }}%** |" >> $GITHUB_STEP_SUMMARY
+            echo "| Minimum Required | \`${{ steps.config.outputs.min_coverage }}%\` |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "📂 Reports:" >> $GITHUB_STEP_SUMMARY
+            echo "- XML Report: \`finhero/target/site/jacoco/jacoco.xml\`" >> $GITHUB_STEP_SUMMARY
+            echo "- HTML Report: \`finhero/target/site/jacoco/index.html\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [ -d finhero/target/surefire-reports ]; then
+            echo "### 📋 Test Reports" >> $GITHUB_STEP_SUMMARY
+            echo "📂 Location: \`finhero/target/surefire-reports\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi

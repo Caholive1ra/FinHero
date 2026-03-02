@@ -1,0 +1,24 @@
+name: Feature / Fix
+
+on:
+  push:
+    branches:
+      - feature/*
+      - fix/*
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: write
+  packages: write
+  deployments: write
+  repository-projects: write
+  security-events: write
+
+jobs:
+  build-and-test:
+    uses: ./.github/workflows/javaReusable.yml
+    secrets: inherit
+  
+  
