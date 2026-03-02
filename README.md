@@ -1,4 +1,4 @@
-# 🦸 FinHero — Gestão Financeira Colaborativa
+# FinHero — Gestão Financeira Colaborativa
 
 <div align="center">
 
