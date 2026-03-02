@@ -1,5 +1,7 @@
 package model;
 
+import model.enums.TransactionType;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
